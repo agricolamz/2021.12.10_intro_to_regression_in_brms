@@ -1,0 +1,18 @@
+---
+title: "Intro to regression in `brms`"
+subtitle: "part of the course 'An introduction to data science for the study of language' by D. E. Blasi"
+author: "G. Moroz"
+date: "10th of December 2021"
+output: html_document
+bibliography: bibliography.bib
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Data
+
+Data in this part is the same as in previous [@bentz14].
+
+## References
