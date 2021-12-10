@@ -8,7 +8,9 @@ bibliography: bibliography.bib
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = TRUE, message=FALSE, warning = FALSE)
+library(tidyverse)
+theme_set(theme_bw())
 ```
 
 ## Data
@@ -20,5 +22,108 @@ library(tidyverse)
 df <- read_csv("https://tinyurl.com/yckr3hkh")
 ```
 
+## Recap from Ezequiel code
+
+Fit the model:
+```{r}
+fit_glm <- glm(Cases_rank ~ Prop_L2, data=df, family="poisson")
+summary(fit_glm)
+```
+
+Visualize your model:
+```{r}
+df %>% 
+  ggplot(aes(Prop_L2, Cases_rank))+
+  geom_point()+
+  geom_smooth(method="glm", method.args=list(family="poisson"), se=TRUE)
+```
+
+Predict something based on the model:
+```{r}
+predict(fit_glm, data.frame(Prop_L2 = c(0.42, 0.57)), type = "response")
+```
+
+## `brms`
+
+Fit the model:
+
+```{r}
+library(brms)
+parallel::detectCores()
+n_cores <- 7 # parallel::detectCores() - 1
+```
+
+
+```{r brms, cache=TRUE, results = "hide"}
+fit_brms <- brm(Cases_rank ~ Prop_L2, data=df, 
+                family = poisson(), 
+                cores = n_cores, refresh = 0, silent = TRUE)
+```
+
+```{r}
+summary(fit_brms)
+```
+
+Visualize your model:
+```{r}
+plot(fit_brms) 
+
+library(tidybayes)
+df %>%
+  add_epred_draws(fit_brms, ndraws = 50) %>% 
+  ggplot(aes(Prop_L2, Cases_rank))+
+  stat_lineribbon(aes(y = .epred)) +
+  geom_point() +
+  scale_fill_brewer(palette = "Greys")
+
+df %>%
+  add_epred_draws(fit_brms, ndraws = 50) %>% 
+  ggplot(aes(Prop_L2, Cases_rank))+
+  geom_line(aes(y = .epred, group = paste(.draw)), alpha = .1) +
+  geom_point()
+```
+
+The idea behind posterior predictive checking is simple: if a model is a good fit then we should be able to use it to generate data that looks a lot like the data we observed.
+
+```{r}
+pp_check(fit_brms)
+```
+
+Predict something based on the model:
+
+```{r}
+predict(fit_brms, data.frame(Prop_L2 = c(0.42, 0.57)), type = "response")
+```
+
+## Priors
+
+What kind of priors are in there:
+
+```{r}
+prior_summary(fit_brms)
+our_priors <- c(prior(normal(1,1), class = b, coef = "Prop_L2"))
+```
+
+Fit the model:
+
+```{r model2, cache=TRUE, results = "hide"}
+fit2_brms <- brm(Cases_rank ~ Prop_L2, data=df,
+                 prior = our_priors,
+                 family = poisson(), 
+                 cores = n_cores, refresh = 0, silent = TRUE)
+```
+
+Is it our new model is so different?
+
+```{r}
+summary(fit2_brms)
+plot(fit2_brms) 
+df %>%
+  add_epred_draws(fit2_brms, ndraws = 50) %>% 
+  ggplot(aes(Prop_L2, Cases_rank))+
+  geom_line(aes(y = .epred, group = paste(.draw)), alpha = .1) +
+  geom_point()
+pp_check(fit2_brms)
+```
 
 ## References
