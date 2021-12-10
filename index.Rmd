@@ -2,7 +2,7 @@
 title: "Intro to regression in `brms`"
 subtitle: "part of the course 'An introduction to data science for the study of language' by D. E. Blasi"
 author: "G. Moroz"
-date: "10th of December 2021"
+date: "10th of December 2021<br>see materials at tinyurl.com/yxgj9yxd"
 output: html_document
 bibliography: bibliography.bib
 ---
@@ -13,6 +13,12 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ## Data
 
-Data in this part is the same as in previous [@bentz14].
+Data in this part is the same as in previous [@bentz14], download them from [here](https://raw.githubusercontent.com/agricolamz/2021.12.10_intro_to_regression_in_brms/master/data/cases.csv).
+
+```{r}
+library(tidyverse)
+df <- read_csv("https://tinyurl.com/yckr3hkh")
+```
+
 
 ## References
